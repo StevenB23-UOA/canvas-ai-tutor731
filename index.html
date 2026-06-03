@@ -1,32 +1,114 @@
-<script>
-  
-<button onclick="console.log('BUTTON CLICKED'); sendMessage('hello')">
-  TEST BUTTON
-</button>
-console.log("SCRIPT LOADED");
-const BACKEND_URL = "https://script.google.com/macros/s/AKfycbydK01Oy9eVwslmO0vmzp8Va-fR7xP78pGHc2GEsvrWprETjZUCFsMDi_35-bQjRz7N/exec";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Canvas AI Tutor</title>
 
-async function sendMessage(query) {
-  const res = await fetch(BACKEND_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: query })
-  });
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
 
-  console.log("STATUS:", res.status);
-  console.log("OK:", res.ok);
+    button {
+      padding: 10px 16px;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
 
-  const text = await res.text();
-  console.log("RAW RESPONSE:", text);
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+    }
 
-  try {
-    const data = JSON.parse(text);
-    console.log("PARSED JSON:", data);
+    #output {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 6px;
+      min-height: 100px;
+    }
+  </style>
+</head>
 
-    return data.text || "No response";
-  } catch (e) {
-    console.error("JSON parse failed", e);
-    return "Backend did not return JSON";
-  }
-}
-</script>
+<body>
+
+  <h2>Canvas AI Tutor</h2>
+
+  <input id="userQuery" type="text" placeholder="Ask a question..." />
+
+  <button onclick="handleClick()">
+    Send
+  </button>
+
+  <button onclick="testButton()">
+    TEST BUTTON
+  </button>
+
+  <div id="output">Output will appear here...</div>
+
+  <script>
+    console.log("SCRIPT LOADED");
+
+    const BACKEND_URL =
+      "https://script.google.com/macros/s/AKfycbydK01Oy9eVwslmO0vmzp8Va-fR7xP78pGHc2GEsvrWprETjZUCFsMDi_35-bQjRz7N/exec";
+
+    function testButton() {
+      console.log("TEST BUTTON CLICKED");
+      document.getElementById("output").innerText = "Test button works";
+    }
+
+    async function handleClick() {
+      const query = document.getElementById("userQuery").value;
+      await sendMessage(query);
+    }
+
+    async function sendMessage(query) {
+      console.log("SEND MESSAGE:", query);
+
+      try {
+        const res = await fetch(BACKEND_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: query })
+        });
+
+        console.log("STATUS:", res.status);
+        console.log("OK:", res.ok);
+
+        const text = await res.text();
+        console.log("RAW RESPONSE:", text);
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          console.error("JSON parse failed", e);
+          document.getElementById("output").innerText =
+            "Backend did not return valid JSON:\n\n" + text;
+          return;
+        }
+
+        const result = data.text || "No response";
+        document.getElementById("output").innerText = result;
+
+        console.log("PARSED RESULT:", data);
+
+      } catch (err) {
+        console.error("FETCH ERROR:", err);
+        document.getElementById("output").innerText =
+          "Network error calling backend";
+      }
+    }
+  </script>
+
+</body>
+</html>
