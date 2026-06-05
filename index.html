@@ -75,11 +75,13 @@
       console.log("SEND MESSAGE:", query);
 
       try {
-        const res = await fetch(BACKEND_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: query })
-        });
+        const formData = new URLSearchParams();
+formData.append("prompt", query);
+
+const res = await fetch(BACKEND_URL, {
+  method: "POST",
+  body: formData
+});
 
         console.log("STATUS:", res.status);
         console.log("OK:", res.ok);
